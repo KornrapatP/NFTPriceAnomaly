@@ -23,7 +23,7 @@ periods = {
 alchemy = "https://eth-mainnet.alchemyapi.io/v2/D-UbUrIYYmbZldDPY-Mr7dCFv7r-nu9O"
 web3 = Web3(Web3.HTTPProvider(alchemy))
 
-collectionNames = ["PUNKS"]
+collectionNames = ["COOLS", "BAYC", "IRENEDAO", "PPG", "PUNKS"]
 
 
 
@@ -57,8 +57,10 @@ def getTransfers(collectionName, web3, period):
 
             for ev in events:
                 tmp = dict(ev['args'])
+                # print(ev['transactionHash'])
+                # break
                 tmp.update(
-                    {'blockNumber': ev['blockNumber'], 'transactionHash': ev['transactionHash'], 'transactionIndex': ev['transactionIndex']})
+                    {'blockNumber': ev['blockNumber'], 'transactionHash': '0x' + bytearray(ev['transactionHash']).hex(), 'transactionIndex': ev['transactionIndex']})
                 dict_writer.writerow(tmp)
 
             if end > period['end']:
