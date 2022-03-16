@@ -2,11 +2,12 @@ import requests
 import csv
 import time
 from utils import fetch_all_tokens_and_eth_txn
+import utils
 from web3 import Web3
 
 
-# alchemy = "https://eth-mainnet.alchemyapi.io/v2/D-UbUrIYYmbZldDPY-Mr7dCFv7r-nu9O"
-alchemy = "https://eth-mainnet.alchemyapi.io/v2/tVrsCCTFkr0wxMmrjkqbOUTfqyF9dvHB"
+alchemy = "https://eth-mainnet.alchemyapi.io/v2/D-UbUrIYYmbZldDPY-Mr7dCFv7r-nu9O"
+# alchemy = "https://eth-mainnet.alchemyapi.io/v2/tVrsCCTFkr0wxMmrjkqbOUTfqyF9dvHB"
 web3 = Web3(Web3.HTTPProvider(alchemy))
 # with open('rawTransaction.csv', 'a') as csvfile:
 #   dataWriter = csv.writer(csvfile)
@@ -72,14 +73,22 @@ web3 = Web3(Web3.HTTPProvider(alchemy))
 #         if row[0]=='13103524':
 #             print(row[0], row[2], row[5])
 
+# with open('IRENEDAO.csv', 'r') as inputFile:
+#     inputReader = csv.reader(inputFile)
+#     prev = None
+#     for row in inputReader:
+#         if row == prev:
+#             0/0
+#         prev = row
 
-ind = 0
-for k in ['PPG']:
+
+for k in ['COOLS', 'PPG']:
+    ind = 0
     with open(k+'.csv', 'r') as inputFile:
         inputReader = csv.reader(inputFile)
-        with open(k+'tokensPaid.csv', 'w') as outputFile:
+        with open(k+'tokensPaid2.csv', 'w') as outputFile:
             outputWriter = csv.writer(outputFile)
-            outputWriter.writerow(['from', 'to', 'tokenId', 'blockNumber', 'transactionIndex', 'transactionHash'])
+            outputWriter.writerow(['from', 'to', 'tokenId', 'blockNumber', 'transactionIndex', 'transactionHash', 'ETH', 'isOpensea', 'isSenderContract', 'isRecceiverContract'])
             bnStart = 0
             for row in inputReader:
                 ind+=1
@@ -87,7 +96,10 @@ for k in ['PPG']:
                     continue
                 if bnStart == 0:
                     bnStart = int(row[3])
-                outputWriter.writerow(row)
-                outputWriter.writerow(fetch_all_tokens_and_eth_txn(web3, row[5], row[1]))
-                if int(row[3]) % 1000000:
-                    print((int(row[3]) - bnStart)/(14149280 - bnStart))
+                tokenList, isOpenSea, isSenderContract, isReceiverContract = fetch_all_tokens_and_eth_txn(web3, row[5], row[1], row[0])
+                if tokenList == None:
+                    continue
+                ethVal = utils.convert_all_to_eth(web3, tokenList, int(row[3]))/1e18
+                outputWriter.writerow(row + [ethVal, isOpenSea, isSenderContract, isReceiverContract])
+                if int(row[3]) % 1000==0:
+                    print(k, (int(row[3]) - bnStart)/(14149280 - bnStart))

@@ -65,7 +65,7 @@ def getTransfers(collectionName, web3, period):
 
             if end > period['end']:
                 break
-            start = end
+            start = end + 1
             end = start + 300
 
 
